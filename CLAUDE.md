@@ -35,7 +35,11 @@ This plugin requires MCP servers and CLI tools configured **outside** this repo:
 
 ## Conventions
 
-- Branch naming: `fix/<SENTRY-ISSUE-ID>-<short-kebab-description>`
-- Commit prefix: `[b]` for bug fixes
+- Branch naming: `bugfix/<ClickUpID>-<short-kebab-description>`
+- Commit prefix: `[b] [<ClickUpID>]`
+- PR title format: `[b] [<ClickUpID>] <ClickUp Task Title>`
+- ClickUp task name format: `[Feature] [Screen] Bug description`
 - ClickUp tasks tagged with `["bug", "sentry"]`, priority `2` (high)
+- Co-Authored-By uses the logged-in GitHub email (`git config user.email`)
 - PR body must link both Sentry issue and ClickUp task
+- After PR creation, ClickUp task status is updated to **PR - IN REVIEW**
