@@ -7,7 +7,7 @@ description: Use when a Sentry error issue needs to be investigated, fixed in co
 
 ## Overview
 
-Complete bug fix lifecycle: Sentry error investigation → root cause analysis → ClickUp task creation → code fix → branch & PR → task status update. Automates the full loop from production error to deliverable fix.
+Complete bug fix lifecycle: Sentry error investigation → root cause analysis → ClickUp task creation → branch → code fix → commit → developer review → PR → task status update. Automates the full loop from production error to deliverable fix.
 
 ## Prerequisites
 
@@ -28,19 +28,25 @@ digraph sentry_to_pr {
 
     investigate [label="1. Investigate\nSentry Issue"];
     rootcause [label="2. Find Root Cause\nin Codebase"];
-    confirm [label="Confirm with Dev", shape=diamond];
+    confirm1 [label="Confirm Root Cause\nwith Dev", shape=diamond];
     clickup [label="3. Create ClickUp\nBug Task"];
-    fix [label="4. Fix the Bug"];
-    branch [label="5. Branch, Commit\n& Create PR"];
-    update [label="6. Update ClickUp\nStatus"];
+    branch [label="4. Create Branch"];
+    fix [label="5. Fix the Bug"];
+    commit [label="6. Commit"];
+    review [label="Dev Manual Review", shape=diamond];
+    pr [label="7. Create PR"];
+    update [label="8. Update ClickUp\nStatus"];
     done [label="Done", shape=doublecircle];
 
     investigate -> rootcause;
-    rootcause -> confirm;
-    confirm -> clickup [label="approved"];
-    clickup -> fix;
-    fix -> branch;
-    branch -> update;
+    rootcause -> confirm1;
+    confirm1 -> clickup [label="approved"];
+    clickup -> branch;
+    branch -> fix;
+    fix -> commit;
+    commit -> review;
+    review -> pr [label="approved"];
+    pr -> update;
     update -> done;
 }
 ```
@@ -63,6 +69,8 @@ Input: Sentry issue ID (numeric) or issue slug (e.g. PROJECT-ABC)
   - **Most relevant stacktrace frame** (first-party code, not third-party/polyfills)
 
 ### 2. Find Root Cause in Codebase
+
+Invoke the `superpowers:systematic-debugging` skill to guide the investigation:
 
 - Identify the relevant module/component from the error context (URL, file path, class name)
 - Search for the culprit function using `Grep` across the relevant module
@@ -97,9 +105,16 @@ Use `AskUserQuestion` to confirm:
   - **tags**: `["bug", "sentry"]`
   - **list_id**: the list ID confirmed by the developer
 
-Save the **ClickUp task ID** and **task title** — these are used for branch naming and PR title.
+Save the **ClickUp Custom ID** (the custom task ID, e.g. `PROJ-123`) and **task title** — these are used for branch naming and PR title.
 
-### 4. Fix the Bug
+### 4. Create Branch
+
+```bash
+git checkout master && git pull
+git checkout -b bugfix/<CustomID>-<short-kebab-description>
+```
+
+### 5. Fix the Bug
 
 Invoke the `superpowers:test-driven-development` skill to guide the fix:
 - Write a failing test that reproduces the bug (if testable)
@@ -108,27 +123,31 @@ Invoke the `superpowers:test-driven-development` skill to guide the fix:
 - Run tests to confirm the fix passes
 - Read the file after editing to confirm correctness
 
-### 5. Create Branch & PR
-
-**Get the GitHub user email** for Co-Authored-By:
-```bash
-git config user.email
-```
-
-**Branch naming:** `bugfix/<ClickUpID>-<short-kebab-description>`
+### 6. Commit
 
 **Commit message format:**
 ```
-[b] [<ClickUpID>] <Short description of the fix>
+[b] [<CustomID>] <Short description of the fix>
 
 <Root cause explanation in 1-2 sentences>
 
 Fixes <SENTRY-ISSUE-ID>
-
-Co-Authored-By: Claude <git-user-email>
 ```
 
-**PR title format:** `[b] [<ClickUpID>] <ClickUp Task Title>`
+Stage changed files and commit.
+
+### 7. Present to Developer & Create PR
+
+**⏸ STOP — Present the fix for developer review before creating PR.**
+
+Use `AskUserQuestion` to present:
+- Summary of changes made (files changed, what was fixed)
+- The commit diff
+- Ask the developer to review and confirm whether to create the PR
+
+If the developer requests changes, go back to step 5 and amend. Only proceed when approved.
+
+**PR title format:** `[b] [<CustomID>] <ClickUp Task Title>`
 
 **PR body format:**
 ```markdown
@@ -150,14 +169,11 @@ Co-Authored-By: Claude <git-user-email>
 ```
 
 **Steps:**
-1. `git checkout master && git pull`
-2. `git checkout -b bugfix/<ClickUpID>-<description>`
-3. Stage changed files, commit
-4. Push to remote with `-u` flag
-5. Create PR with `gh pr create` targeting `master`
-6. If fork setup causes issues, try pushing to `upstream` remote and use `GH_REPO` env var
+1. Push to remote with `-u` flag
+2. Create PR with `gh pr create` targeting `master`
+3. If fork setup causes issues, try pushing to `upstream` remote and use `GH_REPO` env var
 
-### 6. Update ClickUp Task Status
+### 8. Update ClickUp Task Status
 
 After the PR is created successfully:
 - Update the ClickUp task status to **PR - IN REVIEW** using `mcp__clickup__update_task`
@@ -171,19 +187,21 @@ After the PR is created successfully:
 | Searching minified/compiled output instead of source | Identify the module from error context, then search source files (`.ts`, `.js`, `.py`, etc.) |
 | Wrong ClickUp sprint/folder | Always ask the developer — never assume |
 | Skipping dev confirmation | Always pause after root cause analysis — the developer must agree before fixing |
+| Creating PR without dev review | Always present the fix and get approval before creating the PR |
 | PR fails due to fork permissions | Push branch to the upstream remote directly, or use `--head owner:branch` |
 | Overly broad fix | Fix only what the Sentry error reports — no refactoring |
 
 ## Checklist
 
 - [ ] Sentry issue analyzed — error, stacktrace, URL, impact documented
-- [ ] Root cause identified and documented before coding
+- [ ] Root cause identified using systematic-debugging skill
 - [ ] **Developer confirmed** root cause analysis before proceeding
 - [ ] ClickUp task created in **developer-chosen** sprint/folder with Sentry link
 - [ ] Task name follows `[Feature] [Screen] Bug description` format
+- [ ] Branch created: `bugfix/<CustomID>-<desc>`
 - [ ] Fix is minimal and targeted (using TDD skill)
-- [ ] Branch follows naming convention `bugfix/<ClickUpID>-<desc>`
-- [ ] Commit message includes `Fixes <SENTRY-ID>` and correct Co-Authored-By
-- [ ] PR title follows `[b] [ClickUpID] ClickUp Title` format
+- [ ] Changes committed with correct message format
+- [ ] **Developer reviewed** the fix and approved PR creation
+- [ ] PR title follows `[b] [CustomID] ClickUp Title` format
 - [ ] PR includes summary, root cause, test plan, and links to Sentry + ClickUp
 - [ ] ClickUp task status updated to **PR - IN REVIEW**

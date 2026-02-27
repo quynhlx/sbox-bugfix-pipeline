@@ -6,14 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **Claude Code plugin** (not a traditional software project) that automates the bug fix lifecycle:
 
-**Sentry Issue → Root Cause Analysis → Code Fix → ClickUp Task → Branch & PR**
+**Sentry Issue → Root Cause Analysis → Dev Confirmation → ClickUp Task → Branch → Code Fix → Commit → Dev Review → PR → Status Update**
 
 It consists entirely of Markdown skill/command definitions — there is no compiled code, no package manager, no build system, and no test suite.
 
 ## Architecture
 
 - **`commands/fix-sentry.md`** — Slash command (`/fix-sentry <issue-id>`) that delegates to the skill. Uses `disable-model-invocation: true` to pass control directly.
-- **`skills/sentry-to-pr/SKILL.md`** — The core workflow. A 5-step linear pipeline that orchestrates MCP tool calls, codebase search, file edits, and CLI commands.
+- **`skills/sentry-to-pr/SKILL.md`** — The core workflow. An 8-step pipeline with two developer gates, orchestrating MCP tool calls, codebase search, file edits, and CLI commands.
 - **`.claude-plugin/marketplace.json`** — Plugin metadata for Claude Code's plugin marketplace system.
 
 ## External Dependencies
@@ -35,11 +35,10 @@ This plugin requires MCP servers and CLI tools configured **outside** this repo:
 
 ## Conventions
 
-- Branch naming: `bugfix/<ClickUpID>-<short-kebab-description>`
-- Commit prefix: `[b] [<ClickUpID>]`
-- PR title format: `[b] [<ClickUpID>] <ClickUp Task Title>`
+- Branch naming: `bugfix/<CustomID>-<short-kebab-description>` (CustomID = ClickUp custom task ID)
+- Commit prefix: `[b] [<CustomID>]`
+- PR title format: `[b] [<CustomID>] <ClickUp Task Title>`
 - ClickUp task name format: `[Feature] [Screen] Bug description`
 - ClickUp tasks tagged with `["bug", "sentry"]`, priority `2` (high)
-- Co-Authored-By uses the logged-in GitHub email (`git config user.email`)
 - PR body must link both Sentry issue and ClickUp task
 - After PR creation, ClickUp task status is updated to **PR - IN REVIEW**

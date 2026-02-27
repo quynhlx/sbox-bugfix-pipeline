@@ -2,7 +2,7 @@
 
 A Claude Code plugin that automates the complete bug fix lifecycle:
 
-**Sentry Issue** → **Root Cause Analysis** → **Dev Confirmation** → **ClickUp Task** → **Code Fix** → **Branch & PR** → **Status Update**
+**Sentry Issue** → **Root Cause Analysis** → **Dev Confirmation** → **ClickUp Task** → **Branch** → **Code Fix** → **Commit** → **Dev Review** → **PR** → **Status Update**
 
 ## What it does
 
@@ -11,9 +11,11 @@ When you encounter a Sentry error, this plugin guides Claude through:
 1. **Investigating** the Sentry issue (error details, stacktrace, impact)
 2. **Finding the root cause** in the codebase, then **pausing for developer confirmation**
 3. **Creating a ClickUp task** in the developer-chosen sprint/folder
-4. **Fixing** the bug using TDD (test-driven development)
-5. **Creating a branch and PR** with proper naming, commit messages, and linked references
-6. **Updating ClickUp task status** to PR - IN REVIEW
+4. **Creating a branch** from master
+5. **Fixing** the bug using TDD (test-driven development)
+6. **Committing** with standardized message format
+7. **Presenting the fix** to the developer for manual review, then **creating a PR** if approved
+8. **Updating ClickUp task status** to PR - IN REVIEW
 
 ## Prerequisites
 
@@ -94,11 +96,10 @@ The skill `bugfix-pipeline:sentry-to-pr` is automatically available and will be 
 
 | Convention | Format |
 |---|---|
-| Branch naming | `bugfix/<ClickUpID>-<short-kebab-description>` |
-| Commit prefix | `[b] [<ClickUpID>] <description>` |
-| PR title | `[b] [<ClickUpID>] <ClickUp Task Title>` |
+| Branch naming | `bugfix/<CustomID>-<short-kebab-description>` |
+| Commit prefix | `[b] [<CustomID>] <description>` |
+| PR title | `[b] [<CustomID>] <ClickUp Task Title>` |
 | ClickUp task name | `[Feature] [Screen] Bug description` |
-| Co-Authored-By | Uses `git config user.email` |
 
 ## Customization
 
