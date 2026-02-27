@@ -2,17 +2,18 @@
 
 A Claude Code plugin that automates the complete bug fix lifecycle:
 
-**Sentry Issue** → **Root Cause Analysis** → **Code Fix** → **ClickUp Task** → **Branch & PR**
+**Sentry Issue** → **Root Cause Analysis** → **Dev Confirmation** → **ClickUp Task** → **Code Fix** → **Branch & PR** → **Status Update**
 
 ## What it does
 
 When you encounter a Sentry error, this plugin guides Claude through:
 
 1. **Investigating** the Sentry issue (error details, stacktrace, impact)
-2. **Finding the root cause** in the codebase
-3. **Fixing** the bug with a minimal, targeted change
-4. **Creating a ClickUp task** in the latest sprint with full context
+2. **Finding the root cause** in the codebase, then **pausing for developer confirmation**
+3. **Creating a ClickUp task** in the developer-chosen sprint/folder
+4. **Fixing** the bug using TDD (test-driven development)
 5. **Creating a branch and PR** with proper naming, commit messages, and linked references
+6. **Updating ClickUp task status** to PR - IN REVIEW
 
 ## Prerequisites
 
@@ -54,13 +55,13 @@ Configure these MCP servers in `~/.claude/settings.json`:
 
 ```bash
 # Clone the plugin
-git clone <repo-url> ~/Sources/bugfix-pipeline
+git clone <repo-url> ~/Sources/sbox-bugfix-pipeline
 
 # Register as a local marketplace in Claude Code settings
 # Add to ~/.claude/settings.json:
 {
   "pluginMarketplaces": [
-    "file:///Users/<you>/Sources/bugfix-pipeline"
+    "file:///Users/<you>/Sources/sbox-bugfix-pipeline"
   ]
 }
 ```
@@ -89,6 +90,16 @@ Check Sentry issue 6704185624, fix it, create a ClickUp task, and make a PR.
 
 The skill `bugfix-pipeline:sentry-to-pr` is automatically available and will be suggested when you mention Sentry issues.
 
+## Conventions
+
+| Convention | Format |
+|---|---|
+| Branch naming | `bugfix/<ClickUpID>-<short-kebab-description>` |
+| Commit prefix | `[b] [<ClickUpID>] <description>` |
+| PR title | `[b] [<ClickUpID>] <ClickUp Task Title>` |
+| ClickUp task name | `[Feature] [Screen] Bug description` |
+| Co-Authored-By | Uses `git config user.email` |
+
 ## Customization
 
 ### Project-specific conventions
@@ -96,9 +107,6 @@ The skill `bugfix-pipeline:sentry-to-pr` is automatically available and will be 
 Add to your project's `CLAUDE.md`:
 
 ```markdown
-## PR Naming Convention
-- Bug fixes: `[b] [TICKET-ID] Description`
-
 ## Git Remotes
 - `origin`: your fork
 - `upstream`: main repository (PR target)
@@ -106,12 +114,12 @@ Add to your project's `CLAUDE.md`:
 
 ### ClickUp configuration
 
-The plugin auto-discovers your ClickUp workspace, space, and sprint folder. If your sprint folder has a different name, update the skill file.
+The plugin asks the developer to choose the workspace, space, and sprint/folder before creating a task — no assumptions are made.
 
 ## Plugin Structure
 
 ```
-bugfix-pipeline/
+sbox-bugfix-pipeline/
 ├── .claude-plugin/
 │   └── marketplace.json    # Plugin metadata
 ├── skills/
@@ -121,6 +129,13 @@ bugfix-pipeline/
 │   └── fix-sentry.md       # /fix-sentry slash command
 └── README.md
 ```
+
+## Roadmap
+
+| Skill | Description |
+|---|---|
+| `fix-from-clickup` | Read bug details directly from a ClickUp task, understand the issue context, and fix the bug — skipping Sentry investigation |
+| `fix-from-email` | Parse bug reports from email, create a ClickUp task for tracking, then investigate and fix the bug |
 
 ## Contributing
 
