@@ -12,8 +12,10 @@ It consists entirely of Markdown skill/command definitions — there is no compi
 
 ## Architecture
 
-- **`commands/fix-sentry.md`** — Slash command (`/fix-sentry <issue-id>`) that delegates to the skill. Uses `disable-model-invocation: true` to pass control directly.
-- **`skills/sentry-to-pr/SKILL.md`** — The core workflow. An 8-step pipeline with two developer gates, orchestrating MCP tool calls, codebase search, file edits, and CLI commands.
+- **`commands/fix-sentry.md`** — Slash command (`/fix-sentry <issue-id>`) for Sentry errors. Investigates error, creates ClickUp task, fixes and PRs.
+- **`commands/fix-clickup.md`** — Slash command (`/fix-clickup <task-id-or-url>`) for existing ClickUp tasks. Investigates, fixes and PRs.
+- **`skills/sentry-to-pr/SKILL.md`** — Full lifecycle from Sentry error: investigate → root cause → ClickUp task → fix → PR → update status.
+- **`skills/clickup-to-pr/SKILL.md`** — Full lifecycle from existing ClickUp task: analyze → investigate → fix → PR → update status.
 - **`.claude-plugin/marketplace.json`** — Plugin metadata for Claude Code's plugin marketplace system.
 
 ## External Dependencies

@@ -1,0 +1,9 @@
+{
+  "name": "sbox-bugfix-pipeline",
+  "description": "Complete bug fix workflow: Sentry or ClickUp issue investigation, code fix, ClickUp task tracking, and PR creation",
+  "version": "1.0.0",
+  "author": {
+    "name": "Spiderbox Design",
+    "email": "dev@spiderbox.design"
+  }
+}

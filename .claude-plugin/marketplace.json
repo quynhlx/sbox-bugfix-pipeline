@@ -1,14 +1,14 @@
 {
-  "name": "bugfix-pipeline-marketplace",
-  "description": "Marketplace for bugfix-pipeline plugin",
+  "name": "sbox-bugfix-pipeline-marketplace",
+  "description": "Marketplace for sbox-bugfix-pipeline plugin",
   "owner": {
     "name": "Spiderbox Design",
     "email": "dev@spiderbox.design"
   },
   "plugins": [
     {
-      "name": "bugfix-pipeline",
-      "description": "Complete bug fix workflow: Sentry issue investigation, code fix, ClickUp task tracking, and PR creation",
+      "name": "sbox-bugfix-pipeline",
+      "description": "Complete bug fix workflow: Sentry or ClickUp issue investigation, code fix, ClickUp task tracking, and PR creation",
       "version": "1.0.0",
       "source": "./",
       "author": {
