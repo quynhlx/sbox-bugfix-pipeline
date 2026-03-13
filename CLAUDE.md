@@ -6,14 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **Claude Code plugin** (not a traditional software project) that automates the bug fix lifecycle:
 
-**Sentry Issue → Root Cause Analysis → Dev Confirmation → ClickUp Task → Branch → Code Fix → Commit → Dev Review → PR → Status Update**
+**External Issue Report / Sentry Issue → ClickUp Triage → Root Cause Analysis → Code Fix → Branch & PR**
 
 It consists entirely of Markdown skill/command definitions — there is no compiled code, no package manager, no build system, and no test suite.
 
 ## Architecture
 
+- **`commands/fix-issue.md`** — Slash command (`/fix-issue <description>`) for external issue reports (email, Slack, verbal). Triages against ClickUp sprint, creates task if needed, then fixes and PRs.
 - **`commands/fix-sentry.md`** — Slash command (`/fix-sentry <issue-id>`) for Sentry errors. Investigates error, creates ClickUp task, fixes and PRs.
 - **`commands/fix-clickup.md`** — Slash command (`/fix-clickup <task-id-or-url>`) for existing ClickUp tasks. Investigates, fixes and PRs.
+- **`skills/issue-to-pr/SKILL.md`** — Full lifecycle from external issue report: analyze → triage ClickUp sprint → create/find task → investigate → fix → PR → update status.
 - **`skills/sentry-to-pr/SKILL.md`** — Full lifecycle from Sentry error: investigate → root cause → ClickUp task → fix → PR → update status.
 - **`skills/clickup-to-pr/SKILL.md`** — Full lifecycle from existing ClickUp task: analyze → investigate → fix → PR → update status.
 - **`.claude-plugin/marketplace.json`** — Plugin metadata for Claude Code's plugin marketplace system.
